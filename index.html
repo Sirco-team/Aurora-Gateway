@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Aurora Browser</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Header (Toolbar) -->
+  <header id="header">
+    <button onclick="goBack()">←</button>
+    <button onclick="goForward()">→</button>
+    <input id="urlBar" type="text" placeholder="Enter URL or Aurora://command">
+    <button onclick="loadActiveTab()">Load Site</button>
+    <button onclick="newTab()">New Tab</button>
+    <button onclick="toggleFavorites()">★</button>
+    <img id="settingsIcon" class="icon" src="gear.svg" alt="Settings" onclick="openSettings()">
+  </header>
+
+  <!-- Tab Bar -->
+  <div id="tabBar"></div>
+
+  <!-- Content Area -->
+  <div id="content"></div>
+
+  <!-- Favorites Panel -->
+  <div id="favoritesPanel" style="display:none;">
+    <h3>Favorites</h3>
+    <ul id="favoritesList"></ul>
+    <button onclick="addCurrentToFavorites()">Add Current Page</button>
+    <button onclick="toggleFavorites()">Close</button>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" style="display:none;">
+    <div id="settingsModalContent">
+      <span id="settingsModalClose" onclick="closeSettings()">×</span>
+      <h2>Settings</h2>
+      <label for="defaultProxy">Default Proxy:</label>
+      <select id="defaultProxy">
+        <option value="1">CorsProxy.io</option>
+        <option value="2">CORS Anywhere</option>
+        <option value="3">ThingProxy</option>
+        <option value="4">AllOrigins</option>
+      </select>
+      <label for="loadModeSelect">Load Mode:</label>
+      <!-- select "div" mode (our custom method) instead of "iframe" -->
+      <select id="loadModeSelect">
+        <option value="div">Div Mode (custom loader)</option>
+        <option value="data">Data Only (document.write)</option>
+      </select>
+      <label for="rewriteResourcesCheck">Rewrite Resource URLs:</label>
+      <input type="checkbox" id="rewriteResourcesCheck" checked>
+      <label for="overrideDynamicCheck">Override Dynamic Requests:</label>
+      <input type="checkbox" id="overrideDynamicCheck" checked>
+      <button onclick="saveSettingsAndClose()">Save Settings</button>
+    </div>
+  </div>
+
+  <!-- Include main.js -->
+  <script src="/main.js"></script>
+</body>
+</html>
