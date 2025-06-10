@@ -15,56 +15,84 @@
       /* New Tab (Start) Page Styling */
       .new-tab-page { 
         position: relative; 
-        width: 100%; 
-        height: 100%; 
-        background-color: #fff; 
+        width: 520px; 
+        min-height: 420px; 
+        background: rgba(255,255,255,0.95); 
+        border-radius: 32px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 48px auto;
+        padding: 48px 40px 40px 40px;
       }
       .center-content { 
         display: flex; 
         flex-direction: column; 
         align-items: center; 
         justify-content: center; 
-        height: 100%; 
+        width: 100%;
       }
       .logo { 
-        height: 80px; 
-        margin-bottom: 30px; 
+        height: 120px; 
+        margin-bottom: 36px; 
+        filter: drop-shadow(0 0 24px #00ffe7cc);
       }
       .search-container { 
         position: relative; 
         width: 100%; 
-        max-width: 600px; 
+        max-width: 420px; 
+        margin-bottom: 32px;
       }
       .search-bar { 
         width: 100%; 
-        padding: 14px 60px 14px 20px; 
-        font-size: 18px; 
-        border: 1px solid #dfe1e5; 
-        border-radius: 24px; 
+        padding: 22px 70px 22px 28px; 
+        font-size: 1.5rem; 
+        border: 1.5px solid #dfe1e5; 
+        border-radius: 32px; 
         outline: none; 
+        box-shadow: 0 2px 16px 0 #00ffe733;
       }
-      .shortcut-button { margin-top: 20px; }
+      .shortcut-button { margin-top: 28px; }
       .shortcut-button button { 
-        padding: 8px 16px; 
-        font-size: 14px; 
-        background-color: #f8f9fa; 
-        border: 1px solid #dadce0; 
-        border-radius: 4px; 
-        cursor: pointer; 
+        padding: 14px 32px; 
+        font-size: 1.1rem; 
+        background: linear-gradient(135deg, #00ffe7 0%, #3a86ff 100%);
+        color: #181c2b;
+        border: none;
+        border-radius: 24px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 2px 16px 0 #00ffe799;
+        transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+      }
+      .shortcut-button button:hover {
+        background: linear-gradient(135deg, #3a86ff 0%, #00ffe7 100%);
+        color: #232946;
+        transform: translateY(-2px) scale(1.04);
+        box-shadow: 0 4px 24px 0 #00ffe7cc;
       }
       .bottom-right { 
         position: absolute; 
-        bottom: 10px; 
-        right: 10px; 
+        bottom: 24px; 
+        right: 32px; 
       }
       .customize-btn { 
-        padding: 6px 12px; 
-        font-size: 12px; 
+        padding: 12px 28px; 
+        font-size: 1.1rem; 
         color: #202124; 
-        background-color: #fff; 
-        border: 1px solid #dadce0; 
-        border-radius: 4px; 
+        background: #fff; 
+        border: 1.5px solid #dadce0; 
+        border-radius: 24px; 
         cursor: pointer; 
+        font-weight: 600;
+        box-shadow: 0 2px 16px 0 #00ffe733;
+        transition: background 0.2s, color 0.2s;
+      }
+      .customize-btn:hover {
+        background: #e8eaed;
+        color: #232946;
       }
     </style>
     <div class="new-tab-page">

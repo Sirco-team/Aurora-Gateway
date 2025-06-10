@@ -10,28 +10,36 @@
 </head>
 <body>
   <!-- Header (Browser Toolbar) -->
-  <header id="header">
+  <header id="header" class="browser-header glass-effect">
     <div class="toolbar-left">
-      <button class="nav-btn" onclick="goBack()">&#8592;</button>
-      <button class="nav-btn" onclick="goForward()">&#8594;</button>
+      <button class="nav-btn" onclick="goBack()" title="Back">&#8592;</button>
+      <button class="nav-btn" onclick="goForward()" title="Forward">&#8594;</button>
       <input id="urlBar" type="text" placeholder="Enter URL or Aurora://command" onkeypress="if(event.key==='Enter'){ loadActiveTab(); }">
-      <button class="load-btn" onclick="loadActiveTab()">Load Site</button>
+      <button class="load-btn" onclick="loadActiveTab()" title="Load Site">
+        <img src="search.svg" alt="Go" class="icon">
+      </button>
     </div>
     <div class="toolbar-right">
-      <button class="nav-btn" onclick="newTab()">New Tab</button>
-      <button class="nav-btn" onclick="closeTab()">Close Tab</button>
-      <button class="nav-btn" onclick="toggleFavorites()">★</button>
+      <button class="nav-btn" onclick="toggleFavorites()" title="Favorites">★</button>
       <img id="settingsIcon" class="icon" src="gear.svg" alt="Settings" onclick="openSettings()">
     </div>
   </header>
 
   <!-- Tab Navigation Bar -->
-  <div id="tabBar"></div>
+  <div id="tabBar" class="tab-bar glass-effect">
+    <!-- Tabs will be dynamically inserted here -->
+    <button id="addTabBtn" class="add-tab-btn" onclick="newTab()" title="New Tab">+</button>
+  </div>
+
   <!-- Main Content Container -->
-  <div id="content"></div>
+  <div id="centerWrapper">
+    <div id="content" class="futuristic-start-page">
+      <!-- Start page content removed -->
+    </div>
+  </div>
   
   <!-- Favorites Panel -->
-  <div id="favoritesPanel" class="panel">
+  <div id="favoritesPanel" class="panel glass-effect">
     <h3>Favorites</h3>
     <ul id="favoritesList"></ul>
     <button onclick="addCurrentToFavorites()">Add Current Page</button>
@@ -39,7 +47,7 @@
   </div>
   
   <!-- Settings Modal -->
-  <div id="settingsModal" class="modal">
+  <div id="settingsModal" class="modal glass-effect">
     <div id="settingsModalContent">
       <span id="settingsModalClose" onclick="closeSettings()">×</span>
       <h2>Settings</h2>
@@ -64,14 +72,6 @@
   </div>
 
   <!-- Include split JS files in proper order -->
-  <script src="extContent.js"></script>
-  <script src="internal.js"></script>
-  <script src="core.js"></script>
-  <script>
-    window.addEventListener("load", function() {
-      // Create a new internal tab with "Aurora://start" so that the start page loads.
-      newTab("Aurora://start", true);
-    });
-  </script>
+  <script src="main.js"></script>
 </body>
 </html>
