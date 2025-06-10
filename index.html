@@ -2,37 +2,44 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Aurora Browser</title>
+  <title>Aurora Gateway</title>
+  <!-- New modern font and basic resets are defined in styles.css -->
   <link rel="stylesheet" href="styles.css">
+  <!-- Favicon -->
+  <link rel="icon" href="favicon.ico">
 </head>
 <body>
-  <!-- Header (Toolbar) -->
+  <!-- Header (Browser Toolbar) -->
   <header id="header">
-    <button onclick="goBack()">←</button>
-    <button onclick="goForward()">→</button>
-    <input id="urlBar" type="text" placeholder="Enter URL or Aurora://command">
-    <button onclick="loadActiveTab()">Load Site</button>
-    <button onclick="newTab()">New Tab</button>
-    <button onclick="toggleFavorites()">★</button>
-    <img id="settingsIcon" class="icon" src="gear.svg" alt="Settings" onclick="openSettings()">
+    <div class="toolbar-left">
+      <button class="nav-btn" onclick="goBack()">&#8592;</button>
+      <button class="nav-btn" onclick="goForward()">&#8594;</button>
+      <input id="urlBar" type="text" placeholder="Enter URL or Aurora://command" onkeypress="if(event.key==='Enter'){ loadActiveTab(); }">
+      <button class="load-btn" onclick="loadActiveTab()">Load Site</button>
+    </div>
+    <div class="toolbar-right">
+      <button class="nav-btn" onclick="newTab()">New Tab</button>
+      <button class="nav-btn" onclick="closeTab()">Close Tab</button>
+      <button class="nav-btn" onclick="toggleFavorites()">★</button>
+      <img id="settingsIcon" class="icon" src="gear.svg" alt="Settings" onclick="openSettings()">
+    </div>
   </header>
 
-  <!-- Tab Bar -->
+  <!-- Tab Navigation Bar -->
   <div id="tabBar"></div>
-
-  <!-- Content Area -->
+  <!-- Main Content Container -->
   <div id="content"></div>
-
+  
   <!-- Favorites Panel -->
-  <div id="favoritesPanel" style="display:none;">
+  <div id="favoritesPanel" class="panel">
     <h3>Favorites</h3>
     <ul id="favoritesList"></ul>
     <button onclick="addCurrentToFavorites()">Add Current Page</button>
     <button onclick="toggleFavorites()">Close</button>
   </div>
-
+  
   <!-- Settings Modal -->
-  <div id="settingsModal" style="display:none;">
+  <div id="settingsModal" class="modal">
     <div id="settingsModalContent">
       <span id="settingsModalClose" onclick="closeSettings()">×</span>
       <h2>Settings</h2>
@@ -44,10 +51,9 @@
         <option value="4">AllOrigins</option>
       </select>
       <label for="loadModeSelect">Load Mode:</label>
-      <!-- select "div" mode (our custom method) instead of "iframe" -->
       <select id="loadModeSelect">
-        <option value="div">Div Mode (custom loader)</option>
-        <option value="data">Data Only (document.write)</option>
+        <option value="data" selected>Data Only (document.write)</option>
+        <option value="div">Div Mode (Blob/Object)</option>
       </select>
       <label for="rewriteResourcesCheck">Rewrite Resource URLs:</label>
       <input type="checkbox" id="rewriteResourcesCheck" checked>
@@ -57,7 +63,15 @@
     </div>
   </div>
 
-  <!-- Include main.js -->
-  <script src="/main.js"></script>
+  <!-- Include split JS files in proper order -->
+  <script src="extContent.js"></script>
+  <script src="internal.js"></script>
+  <script src="core.js"></script>
+  <script>
+    window.addEventListener("load", function() {
+      // Create a new internal tab with "Aurora://start" so that the start page loads.
+      newTab("Aurora://start", true);
+    });
+  </script>
 </body>
 </html>
