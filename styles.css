@@ -62,10 +62,15 @@ html, body {
   background-color: rgba(66,133,244,0.1);
 }
 #settingsIcon {
+  cursor: pointer;
   width: 24px;
   height: 24px;
-  cursor: pointer;
-  margin-left: 8px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+#settingsIcon:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* TAB BAR */
@@ -77,16 +82,51 @@ html, body {
   border-bottom: 1px solid #dadce0;
 }
 .tab {
-  padding: 6px 12px;
-  margin-right: 2px;
-  cursor: pointer;
-  background-color: #e8eaed;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
   border-radius: 4px 4px 0 0;
-  font-size: 14px;
+  margin-right: 1px;
+  max-width: 200px;
+  position: relative;
 }
 .tab.activeTab {
-  background-color: #ffffff;
-  border-bottom: 2px solid #4285f4;
+  background: #fff;
+  border-bottom: none;
+}
+
+/* Close tab button */
+.close-tab {
+  margin-left: 8px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #e0e0e0;
+  cursor: pointer;
+  font-size: 14px;
+}
+.close-tab:hover {
+  background: #d0d0d0;
+}
+
+/* Add tab button */
+#addTabBtn {
+  padding: 4px 12px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 20px;
+  margin: 0 8px;
+}
+#addTabBtn:hover {
+  background: #45a049;
 }
 
 /* CONTENT AREA */
@@ -114,6 +154,7 @@ html, body {
   padding: 12px;
   z-index: 1000;
   overflow-y: auto;
+  display: none;
 }
 #favoritesPanel h3 {
   text-align: center;
@@ -137,48 +178,90 @@ html, body {
 
 /* SETTINGS MODAL */
 #settingsModal {
-  display: none; 
   position: fixed;
-  top:0;
+  top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(60,64,67,0.75);
-  display: flex;
-  align-items: center;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 9999;
+  display: none;
   justify-content: center;
-  z-index: 2000;
+  align-items: flex-start;
+  overflow-y: auto;
+  padding: 20px;
 }
 #settingsModalContent {
-  background-color: #ffffff;
-  border-radius: 8px;
-  padding: 20px;
+  background: #1a1a1a;
+  padding: 25px;
+  border-radius: 12px;
+  max-width: 800px;
   width: 90%;
-  max-width: 400px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  margin: 20px auto;
+  position: relative;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
-#settingsModalContent h2 {
+#settingsModalClose {
+  position: sticky;
+  top: 10px;
+  right: 10px;
+  float: right;
+  font-size: 24px;
+  cursor: pointer;
+  color: #fff;
+  width: 30px;
+  height: 30px;
   text-align: center;
-  margin-bottom: 16px;
-  font-size: 20px;
-  color: #202124;
+  line-height: 30px;
+  border-radius: 50%;
+  background: #333;
+  transition: background 0.3s;
 }
-#settingsModalContent label {
-  font-size: 14px;
-  margin: 6px 0 2px 0;
-  color: #5f6368;
+#settingsModalClose:hover {
+  background: #444;
 }
-#settingsModalContent input[type="text"],
-#settingsModalContent select {
+.settings-section {
+  margin-bottom: 25px;
+  padding: 15px;
+  background: #222;
+  border-radius: 8px;
+}
+.settings-section h3 {
+  margin-top: 0;
+  color: #66ffa1;
+  border-bottom: 2px solid #333;
+  padding-bottom: 10px;
+}
+.settings-section label {
+  display: block;
+  margin: 10px 0;
+  color: #fff;
+}
+.settings-section input[type="text"],
+.settings-section input[type="number"],
+.settings-section select {
   width: 100%;
   padding: 8px;
-  margin-bottom: 12px;
-  border: 1px solid #dadce0;
+  background: #333;
+  border: 1px solid #444;
+  color: #fff;
   border-radius: 4px;
-  font-size: 14px;
+  margin-top: 5px;
 }
-#settingsModalContent input[type="checkbox"] {
-  margin-right: 4px;
+.settings-section button {
+  background: #66ffa1;
+  color: #000;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin-top: 10px;
+}
+.settings-section button:hover {
+  background: #4dff8e;
 }
 
 /* START PAGE (Internal) Styling */
@@ -331,4 +414,181 @@ html, body {
 }
 .tabContent > .div-mode-wrapper {
   flex: 1 1 auto;
+}
+
+/* Theme support */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f0f0f0;
+  --text-primary: #000000;
+  --text-secondary: #666666;
+  --accent-color: #4CAF50;
+  --border-color: #dddddd;
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --text-primary: #ffffff;
+  --text-secondary: #bbbbbb;
+  --accent-color: #45a049;
+  --border-color: #404040;
+}
+
+/* Theme Variables */
+:root[data-theme="light"] {
+    --bg-color: #ffffff;
+    --text-color: #202124;
+    --border-color: #dadce0;
+    --header-bg: rgba(255, 255, 255, 0.85);
+    --modal-bg: rgba(255, 255, 255, 0.95);
+    --hover-color: #f1f3f4;
+    --active-color: #e8f0fe;
+    --input-bg: #ffffff;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+:root[data-theme="dark"] {
+    --bg-color: #202124;
+    --text-color: #e8eaed;
+    --border-color: #3c4043;
+    --header-bg: rgba(32, 33, 36, 0.85);
+    --modal-bg: rgba(32, 33, 36, 0.95);
+    --hover-color: #3c4043;
+    --active-color: #41464c;
+    --input-bg: #303134;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Global Styles */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Header & Navigation */
+.browser-header {
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nav-btn {
+    background: transparent;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+.nav-btn:hover {
+    background: var(--hover-color);
+}
+
+/* Inputs & Forms */
+input, select, textarea {
+    background: var(--input-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+/* Modals & Panels */
+.modal, .panel {
+    background: var(--modal-bg);
+    border: 1px solid var(--border-color);
+}
+
+/* Tabs */
+.tab {
+    background: var(--input-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+.tab.activeTab {
+    background: var(--active-color);
+}
+
+/* Settings Modal */
+.settings-section {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.theme-option {
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.theme-option.active {
+    background: var(--active-color);
+}
+
+/* Extension Panel Styles */
+.panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--modal-bg);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    z-index: 1000;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+#extensionsPanel {
+    display: none;
+}
+
+.extension-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background: var(--input-bg);
+}
+
+.extension-icon {
+    font-size: 24px;
+    margin-right: 12px;
+}
+
+.extension-info {
+    flex: 1;
+}
+
+.extension-name {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.extension-version {
+    font-size: 12px;
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+.extension-description {
+    font-size: 14px;
+    color: var(--text-color);
+    opacity: 0.9;
+}
+
+.custom-extension-input {
+    margin-bottom: 20px;
+    padding: 12px;
+    background: var(--input-bg);
+    border-radius: 8px;
+}
+
+.custom-extension-input input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 8px;
 }
