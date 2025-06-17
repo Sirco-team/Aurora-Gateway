@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Aurora Custom Browser</title>
+    <link rel="stylesheet" href="../browser/browser.css">
+    <link rel="icon" href="../favicon.ico">
+</head>
+<body>
+    <header id="header" class="browser-header glass-effect">
+        <div class="toolbar-left">
+            <button class="nav-btn" onclick="browser.goBack()" title="Back">&#8592;</button>
+            <button class="nav-btn" onclick="browser.goForward()" title="Forward">&#8594;</button>
+            <button class="nav-btn" onclick="browser.refreshPage()" title="Refresh">&#8635;</button>
+            <input id="urlBar" type="text" placeholder="Enter URL or search">
+            <button class="load-btn" onclick="browser.loadActiveTab()" title="Load">Go</button>
+        </div>
+        <div class="toolbar-right">
+            <button class="nav-btn" onclick="browser.openSettings()" title="Settings">⚙️</button>
+            <a href="/" class="nav-btn" title="Change Proxy">⚡</a>
+        </div>
+    </header>
+
+    <div id="tabBar" class="tab-bar glass-effect">
+        <button id="addTabBtn" class="add-tab-btn" onclick="browser.newTab()" title="New Tab">+</button>
+    </div>
+
+    <div id="content"></div>
+
+    <!-- Load browser core first -->
+    <script src="../browser/browser.js"></script>
+    <script src="../browser/aurora-start.js"></script>
+    
+    <!-- Initialize browser -->
+    <script>
+        let browser;
+
+        function initBrowser() {
+            browser = new AuroraBrowser({
+                proxyHandler: async (tabId, url) => {
+                    try {
+                        const container = document.getElementById(tabId);
+                        const iframe = document.createElement('iframe');
+                        iframe.style.width = '100%';
+                        iframe.style.height = '100%';
+                        iframe.style.border = 'none';
+                        iframe.allow = 'fullscreen; autoplay; clipboard-write';
+                        iframe.sandbox = 'allow-same-origin allow-scripts allow-forms allow-popups';
+                        
+                        // Use active proxy from settings
+                        const proxyBase = browser.settings.activeProxyUrl || window.location.origin + '/aurora';
+                        iframe.src = `${proxyBase}/proxy?url=${encodeURIComponent(url)}`;
+                        
+                        const activeProxy = browser.settings.activeProxyUrl || window.location.origin + '/aurora';
+                        iframe.src = `${activeProxy}/proxy?url=${encodeURIComponent(url)}`;
+                        
+                        container.innerHTML = '';
+                        container.appendChild(iframe);
+                    } catch (err) {
+                        console.error('Aurora proxy error:', err);
+                        throw err;
+                    }
+                }
+            });
+
+            // Load saved settings
+            const savedSettings = localStorage.getItem('Aurora.settings');
+            if (savedSettings) {
+                try {
+                    const settings = JSON.parse(savedSettings);
+                    browser.applySettings(settings);
+                } catch (err) {
+                    console.error('Failed to load settings:', err);
+                }
+            }
+
+            window.browser = browser;
+        }
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initBrowser);
+        } else {
+            initBrowser();
+        }
+    </script>
+</body>
+</html>

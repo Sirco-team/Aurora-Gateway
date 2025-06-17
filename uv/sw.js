@@ -1,38 +1,39 @@
-importScripts('/uv/uv.bundle.js');
-importScripts('/uv/uv.config.js');
-importScripts('/uv/uv.sw.bundle.js');
+// UV Service Worker
+importScripts('uv.bundle.js');
+importScripts('uv.client.js');
+importScripts('uv.config.js');
 
-if (typeof UVServiceWorker === 'undefined') {
-    throw new Error('UVServiceWorker not found. Check script loading order.');
+class UVServiceWorker {
+    constructor() {
+        this.config = self.__uv$config;
+        this.handler = self.__uv.handler;
+        this.bareClient = new Ultraviolet.BareClient(this.config.bare);
+    }
+
+    async fetch(event) {
+        const url = new URL(event.request.url);
+        if (!url.pathname.startsWith(this.config.prefix)) {
+            return fetch(event.request);
+        }
+
+        try {
+            return await this.bareClient.fetch(event.request);
+        } catch (error) {
+            return new Response('UV Error: ' + error.toString(), { status: 500 });
+        }
+    }
 }
 
-if (typeof __uv$config === 'undefined') {
-    throw new Error('UV config not found. Check uv.config.js');
-}
-
-const sw = new UVServiceWorker();
+const uv = new UVServiceWorker();
 
 self.addEventListener('install', event => {
-    console.log('[UV] Installing service worker...');
     event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener('activate', event => {
-    console.log('[UV] Activating service worker...');
     event.waitUntil(self.clients.claim());
 });
 
 self.addEventListener('fetch', event => {
-    const url = new URL(event.request.url);
-    if (url.pathname.startsWith(__uv$config.prefix)) {
-        event.respondWith(
-            sw.fetch(event).catch(err => {
-                console.error('[UV] Fetch error:', err);
-                return new Response('Service Worker Error: ' + err.message, {
-                    status: 500,
-                    headers: { 'Content-Type': 'text/plain' }
-                });
-            })
-        );
-    }
+    event.respondWith(uv.fetch(event));
 });

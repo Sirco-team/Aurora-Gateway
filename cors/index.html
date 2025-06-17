@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Aurora CORS Browser</title>
+    <link rel="stylesheet" href="../browser/browser.css">
+    <link rel="icon" href="../favicon.ico">
+    <script src="proxyHandling.js"></script>
+</head>
+<body>
+    <header id="header" class="browser-header glass-effect">
+        <div class="toolbar-left">
+            <button class="nav-btn" onclick="handleBrowserAction('goBack')" title="Back">&#8592;</button>
+            <button class="nav-btn" onclick="handleBrowserAction('goForward')" title="Forward">&#8594;</button>
+            <button class="nav-btn" onclick="handleBrowserAction('refreshPage')" title="Refresh">&#8635;</button>
+            <input id="urlBar" type="text" placeholder="Enter URL or search">
+            <button class="load-btn" onclick="handleBrowserAction('loadActiveTab')" title="Load">Go</button>
+        </div>
+        <div class="toolbar-right">
+            <button class="nav-btn" onclick="handleBrowserAction('toggleFullscreen')" title="Fullscreen">⛶</button>
+            <button id="extensionsBtn" class="nav-btn" title="Extensions">🧩</button>
+            <button id="settingsBtn" class="nav-btn" onclick="handleBrowserAction('openSettings')" title="Settings">⚙️</button>
+            <a href="/" class="nav-btn" title="Change Proxy">⚡</a>
+        </div>
+    </header>
+
+    <div id="tabBar" class="tab-bar glass-effect">
+        <button id="addTabBtn" class="add-tab-btn" onclick="handleBrowserAction('newTab')" title="New Tab">+</button>
+    </div>
+
+    <div id="content" style="position: fixed; top: 85px; left: 0; right: 0; bottom: 0; overflow: hidden;"></div>
+    <div id="extensionsPanel" class="extensions-panel glass-effect" style="display: none; background: rgba(255, 255, 255, 0.95); color: #000;">
+        <div class="settings-header">
+            <h2 style="color: #000;">Settings</h2>
+            <button class="close-btn" onclick="handleBrowserAction('closeSettings')" style="color: #000;">&times;</button>
+        </div>
+        <div class="settings-content">
+            <div class="setting-group">
+                <h3 style="color: #000;">CORS Proxy Settings</h3>
+                <div class="setting-item">
+                    <label for="corsProxySelector" style="color: #000;">Current Proxy:</label>
+                    <select id="corsProxySelector" onchange="updateCorsProxy(this.value)" style="color: #000; background: #fff; border: 1px solid #ccc; padding: 5px; border-radius: 4px;">
+                        <option value="corsproxy.io">corsproxy.io (Proxy)</option>
+                        <option value="api.allorigins.win">AllOrigins (Proxy)</option>
+                        <option value="api.codetabs.com">CodeTabs (Proxy)</option>
+                        <option value="direct">Direct (No Proxy)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .extensions-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            max-width: 90%;
+            background: rgba(30, 30, 46, 0.95);
+            color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .settings-header h2 {
+            margin: 0;
+            font-size: 1.2em;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            opacity: 0.7;
+        }
+        .close-btn:hover {
+            opacity: 1;
+        }
+        .settings-content {
+            padding: 20px;
+        }
+        .setting-group {
+            margin-bottom: 20px;
+        }
+        .setting-group h3 {
+            margin: 0 0 15px 0;
+            font-size: 1.1em;
+            color: #6366f1;
+        }
+        .setting-item {
+            margin-bottom: 15px;
+        }
+        .setting-item label {
+            display: block;
+            margin-bottom: 5px;
+            opacity: 0.8;
+        }
+        #corsProxySelector {
+            width: 100%;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 14px;
+        }
+        #corsProxySelector:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+        #corsProxySelector option {
+            background: #1e1e2e;
+            color: #fff;
+        }
+    </style>
+
+    <!-- Load browser core -->
+    <script src="../browser/browser.js"></script>
+    <script src="../browser/aurora-start.js"></script>
+    <script>window.AuroraBrowser = AuroraBrowser;</script>
+    
+    <script>
+        let browser;
+        let currentProxy = localStorage.getItem('selectedCorsProxy') || 'corsproxy.io';
+        
+        function updateCorsProxy(proxy) {
+            currentProxy = proxy;
+            localStorage.setItem('selectedCorsProxy', proxy);
+        }
+
+        // Track fullscreen state
+        let wasFullscreen = localStorage.getItem('wasFullscreen') === 'true';
+
+        // Listen for fullscreen changes
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement && wasFullscreen) {
+                wasFullscreen = false;
+                localStorage.setItem('wasFullscreen', 'false');
+            } else if (document.fullscreenElement) {
+                wasFullscreen = true;
+                localStorage.setItem('wasFullscreen', 'true');
+            }
+        });
+
+        async function loadStartPage(container) {
+            try {
+                const response = await fetch('./start.html');
+                const html = await response.text();
+                container.innerHTML = html;
+
+                const script = document.createElement('script');
+                script.textContent = `
+                    function handleSearch(e) {
+                        e.preventDefault();
+                        const query = e.target.querySelector('input').value;
+                        let url = query;
+                        if (!url.match(/^https?:\\/\\//i)) {
+                            if (url.includes('.') && !url.includes(' ')) {
+                                url = 'https://' + url;
+                            } else {
+                                url = 'https://www.google.com/search?q=' + encodeURIComponent(url);
+                            }
+                        }
+                        loadSite(url);
+                    }
+
+                    function loadSite(url) {
+                        if (window.parent && window.parent.browser) {
+                            window.parent.browser.loadTab(window.parent.browser.activeTabId, url);
+                        }
+                        return false;
+                    }
+                `;
+                container.appendChild(script);
+
+                // Set up quick links
+                container.querySelectorAll('.quick-link').forEach(link => {
+                    const url = link.getAttribute('data-url');
+                    if (url) {
+                        link.onclick = (e) => {
+                            e.preventDefault();
+                            if (window.parent && window.parent.browser) {
+                                window.parent.browser.loadTab(window.parent.browser.activeTabId, url);
+                            }
+                            return false;
+                        };
+                    }
+                });
+
+                // Update proxy info
+                const proxyInfo = container.querySelector('#currentProxy');
+                if (proxyInfo) {
+                    proxyInfo.textContent = currentProxy || 'corsproxy.io';
+                }
+            } catch (err) {
+                console.error('Error loading start page:', err);
+                container.innerHTML = '<div class="error">Failed to load start page</div>';
+            }
+        }
+
+        function initBrowser() {
+            try {
+                const proxySelector = document.getElementById('corsProxySelector');
+                if (proxySelector) {
+                    proxySelector.value = currentProxy;
+                }
+
+                browser = new AuroraBrowser({
+                    goBack: () => window.history.back(),
+                    goForward: () => window.history.forward(),
+                    refreshPage: () => window.location.reload(),
+                    closeTab: (tabId) => browser.removeTab(tabId),
+                    closeSettings: () => {
+                        const settingsPanel = document.getElementById('extensionsPanel');
+                        if (settingsPanel) settingsPanel.style.display = 'none';
+                    },
+                    openSettings: () => {
+                        const settingsPanel = document.getElementById('extensionsPanel');
+                        if (settingsPanel) settingsPanel.style.display = 'block';
+                    },
+                    async proxyHandler(tabId, url) {
+                        try {
+                            const container = document.getElementById(tabId);
+                            if (!container) {
+                                throw new Error(`Container ${tabId} not found`);
+                            }
+
+                            if (url === 'aurora://start') {
+                                await loadStartPage(container);
+                                return;
+                            }
+
+                            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                                url = 'https://' + url.replace(/^\/+/, '');
+                            }
+
+                            const { html } = await window.proxyHandler.fetchAndProcess(url, currentProxy);
+                            
+                            // Create wrapper for content
+                            container.innerHTML = '';
+                            const wrapper = document.createElement('div');
+                            wrapper.style.cssText = 'width: 100%; height: 100%; border: none; margin: 0; padding: 0; overflow: auto;';
+                            wrapper.innerHTML = `<base href="${url}">` + html;
+                            container.appendChild(wrapper);
+
+                            // Update UI
+                            const urlBar = document.getElementById('urlBar');
+                            if (urlBar) urlBar.value = url;
+                            document.cookie = `lastUrl=${encodeURIComponent(url)};path=/`;
+                            
+                            const tabButton = document.querySelector(`[data-tab-id="${tabId}"] .tab-title`);
+                            if (tabButton) tabButton.textContent = url;
+                        } catch (err) {
+                            console.error('Proxy error:', err);
+                            throw err;
+                        }
+                    },
+                    defaultUrl: 'aurora://start',
+                    onTabClosed: (tabId) => console.log('Tab closed:', tabId),
+                    onError: (error) => console.error('Browser error:', error)
+                });
+
+                window.browser = browser;
+                
+                const urlBar = document.getElementById('urlBar');
+                if (urlBar) {
+                    urlBar.value = 'aurora://start';
+                    urlBar.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            handleBrowserAction('loadActiveTab');
+                        }
+                    });
+                }
+
+                browser.newTab();
+            } catch (err) {
+                console.error('Browser initialization failed:', err);
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initBrowser);
+        } else {
+            initBrowser();
+        }
+
+        function handleBrowserAction(action) {
+            if (!window.browser) {
+                console.error('Browser not initialized');
+                return;
+            }
+            if (typeof window.browser[action] === 'function') {
+                window.browser[action]();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -142,6 +142,75 @@
               color: #4a5568;
               text-align: center;
             }
+            .start-page {
+              text-align: center;
+              padding: 32px;
+            }
+            .proxy-selection {
+              display: flex;
+              justify-content: center;
+              gap: 16px;
+              margin: 32px 0;
+            }
+            .proxy-card {
+              background: #f7fafc;
+              border-radius: 16px;
+              padding: 24px;
+              cursor: pointer;
+              transition: all 0.2s;
+              flex: 1;
+              max-width: 220px;
+              margin: 0 8px;
+            }
+            .proxy-card:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            }
+            .proxy-badge {
+              display: inline-block;
+              padding: 4px 8px;
+              border-radius: 12px;
+              font-size: 0.8rem;
+              margin-top: 8px;
+            }
+            .proxy-badge.normal {
+              background: #c6f6d5;
+              color: #2f855a;
+            }
+            .proxy-badge.sw {
+              background: #bee3f8;
+              color: #3182ce;
+            }
+            .proxy-badge.experimental {
+              background: #fed7e2;
+              color: #e53e3e;
+            }
+            .quick-links {
+              margin-top: 32px;
+              text-align: left;
+            }
+            .quick-links h3 {
+              margin-bottom: 16px;
+              font-size: 1.2rem;
+              color: #2d3748;
+            }
+            .link-grid {
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+            }
+            .link-grid a {
+              padding: 12px 16px;
+              border-radius: 12px;
+              background: #edf2f7;
+              color: #2d3748;
+              text-decoration: none;
+              transition: all 0.2s;
+            }
+            .link-grid a:hover {
+              background: #e2e8f0;
+              transform: translateY(-2px);
+            }
           </style>
           <div class="new-tab-page">
             <div class="top-bar">
@@ -158,6 +227,35 @@
               </div>
               <div class="shortcuts-grid" id="shortcutsGrid">
                 <!-- Shortcuts will be dynamically populated -->
+              </div>
+            </div>
+            <div class="start-page">
+              <h1>Welcome to Aurora Gateway</h1>
+              <div class="proxy-selection">
+                <div class="proxy-card" onclick="switchProxy('uv')">
+                  <h2>Ultraviolet</h2>
+                  <p>Recommended for most sites</p>
+                  <span class="proxy-badge normal">Stable</span>
+                </div>
+                <div class="proxy-card" onclick="switchProxy('wisp')">
+                  <h2>Wisp</h2>
+                  <p>Best for WebSocket sites</p>
+                  <span class="proxy-badge sw">WebSocket</span>
+                </div>
+                <div class="proxy-card" onclick="switchProxy('aurora')">
+                  <h2>Aurora</h2>
+                  <p>Custom proxy server</p>
+                  <span class="proxy-badge experimental">Beta</span>
+                </div>
+              </div>
+              <div class="quick-links">
+                <h3>Quick Links</h3>
+                <div class="link-grid">
+                  <a href="javascript:void(0)" onclick="loadTabUrl(window.activeTabId, 'https://google.com')">Google</a>
+                  <a href="javascript:void(0)" onclick="loadTabUrl(window.activeTabId, 'https://youtube.com')">YouTube</a>
+                  <a href="javascript:void(0)" onclick="loadTabUrl(window.activeTabId, 'https://discord.com')">Discord</a>
+                  <a href="javascript:void(0)" onclick="loadTabUrl(window.activeTabId, 'https://reddit.com')">Reddit</a>
+                </div>
               </div>
             </div>
           </div>
@@ -240,3 +338,48 @@ window.openSettings = function() {
     window.openSettingsModal();
   }
 };
+
+// Aurora Gateway Start Page
+function buildStartPage() {
+    const container = document.getElementById('startPage');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="start-page">
+            <h1>Welcome to Aurora Gateway</h1>
+            <div class="proxy-selection">
+                <div class="proxy-card" onclick="switchProxy('uv')">
+                    <h2>Ultraviolet</h2>
+                    <p>Recommended for most sites</p>
+                    <span class="proxy-badge normal">Stable</span>
+                </div>
+                <div class="proxy-card" onclick="switchProxy('wisp')">
+                    <h2>Wisp</h2>
+                    <p>Best for WebSocket sites</p>
+                    <span class="proxy-badge sw">WebSocket</span>
+                </div>
+                <div class="proxy-card" onclick="switchProxy('aurora')">
+                    <h2>Aurora</h2>
+                    <p>Custom proxy server</p>
+                    <span class="proxy-badge experimental">Beta</span>
+                </div>
+            </div>
+            <div class="quick-links">
+                <h3>Quick Links</h3>
+                <div class="link-grid">
+                    <a href="javascript:void(0)" onclick="loadTabUrl(window.activeTabId, 'https://google.com')">Google</a>
+                    <a href="javascript:void(0)" onclick="loadTabUrl(window.activeTabId, 'https://youtube.com')">YouTube</a>
+                    <a href="javascript:void(0)" onclick="loadTabUrl(window.activeTabId, 'https://discord.com')">Discord</a>
+                    <a href="javascript:void(0)" onclick="loadTabUrl(window.activeTabId, 'https://reddit.com')">Reddit</a>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Initialize when loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', buildStartPage);
+} else {
+    buildStartPage();
+}

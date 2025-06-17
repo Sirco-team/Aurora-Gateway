@@ -1,0 +1,16 @@
+{
+  "name": "aurora-gateway",
+  "version": "1.0.0",
+  "description": "A proxy server for Aurora Gateway",
+  "main": "aurora-proxy-server.js",
+  "scripts": {
+    "start": "node aurora-proxy-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "node-fetch": "^2.6.9",
+    "cheerio": "^1.0.0-rc.12",
+    "ws": "^8.16.0"
+  }
+}

@@ -1,239 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Aurora Gateway</title>
-  <!-- New modern font and basic resets are defined in styles.css -->
-  <link rel="stylesheet" href="styles.css">
-  <!-- Favicon -->
-  <link rel="icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <title>Aurora Gateway</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1e1e2e, #2d2d44);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            text-align: center;
+            color: #fff;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 1em;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .proxy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 800px;
+            padding: 20px;
+        }
+        .proxy-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .proxy-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-top: 8px;
+        }
+        .recommended { background: #4CAF50; }
+        .beta { background: #2196F3; }
+        .experimental { background: #FF9800; }
+    </style>
 </head>
 <body>
-  <!-- Header (Browser Toolbar) -->
-  <header id="header" class="browser-header glass-effect">
-    <div class="toolbar-left">
-      <button class="nav-btn" onclick="goBack()" title="Back">&#8592;</button>
-      <button class="nav-btn" onclick="goForward()" title="Forward">&#8594;</button>
-      <button class="nav-btn" onclick="refreshPage()" title="Refresh">&#8635;</button>
-      <input id="urlBar" type="text" placeholder="Enter URL or Aurora://command" onkeypress="if(event.key==='Enter'){ loadActiveTab(); }">
-      <button class="load-btn" onclick="loadActiveTab()" title="Load Site">
-        <img src="search.svg" alt="Go" class="icon">
-      </button>
-    </div>
-    <div class="toolbar-right">
-      <button class="nav-btn" onclick="toggleFavorites()" title="Favorites">★</button>
-      <button class="nav-btn" onclick="toggleExtensions()" title="Extensions">🧩</button>
-      <img id="settingsIcon" class="icon" src="gear.svg" alt="Settings" onclick="openSettings()">
-    </div>
-  </header>
-
-  <!-- Tab Navigation Bar -->
-  <div id="tabBar" class="tab-bar glass-effect">
-    <!-- Tabs will be dynamically inserted here -->
-    <button id="addTabBtn" class="add-tab-btn" onclick="newTab()" title="New Tab">+</button>
-  </div>
-
-  <!-- Main Content Container -->
-  <div id="centerWrapper">
-    <div id="content">
-      <iframe id="contentFrame" sandbox="allow-scripts allow-forms allow-popups allow-presentation" loading="lazy"></iframe>
-      <div id="loadingIndicator" class="loading-spinner"></div>
-    </div>
-  </div>
-  
-  <!-- Favorites Panel -->
-  <div id="favoritesPanel" class="panel glass-effect">
-    <h3>Favorites</h3>
-    <ul id="favoritesList"></ul>
-    <button onclick="addCurrentToFavorites()">Add Current Page</button>
-    <button onclick="toggleFavorites()">Close</button>
-  </div>
-  
-  <!-- Settings Modal -->
-  <div id="settingsModal" class="modal glass-effect">
-    <div id="settingsModalContent">
-      <span id="settingsModalClose" onclick="closeSettings()">×</span>
-      <h2>Settings</h2>
-      
-      <div class="settings-section">
-        <h3>Appearance</h3>
-        <div class="theme-selector">
-          <div class="theme-option" data-theme="light" onclick="setTheme('light')">Light Theme</div>
-          <div class="theme-option" data-theme="dark" onclick="setTheme('dark')">Dark Theme</div>
-        </div>
-        <label>
-          <input type="checkbox" id="showFavicons">
-          Show Tab Favicons
-        </label>
-        <select id="tabWidth">
-          <option value="narrow">Narrow Tabs</option>
-          <option value="normal">Normal Tabs</option>
-          <option value="wide">Wide Tabs</option>
-        </select>
-      </div>
-
-      <div class="settings-section">
-        <h3>Search</h3>
-        <select id="searchEngine">
-          <option value="duckduckgo">DuckDuckGo</option>
-          <option value="google">Google</option>
-          <option value="bing">Bing</option>
-        </select>
-      </div>
-
-      <div class="settings-section">
-        <h3>Extensions</h3>
-        <label>
-          <input type="checkbox" id="enableExtensions">
-          Enable Extensions Support
-        </label>
-      </div>
-
-      <div class="settings-section">
-        <h3>Proxy Settings</h3>
-        <div class="proxy-type-section">
-          <h4>Proxy Type</h4>
-          <div class="proxy-options-container">
-            <div class="proxy-option">
-              <input type="radio" name="proxyType" id="proxyUV" value="uv" checked>
-              <label for="proxyUV">Ultraviolet
-                <span class="proxy-badge normal">Recommended</span>
-              </label>
+    <div class="container">
+        <h1>Aurora Gateway</h1>
+        <div class="proxy-grid">
+            <div class="proxy-card" onclick="window.location.href='/uv/'">
+                <h2>Ultraviolet</h2>
+                <p>Fast and reliable proxy</p>
+                <span class="badge recommended">Recommended</span>
             </div>
-            <div class="proxy-option">
-              <input type="radio" name="proxyType" id="proxyWisp" value="wisp">
-              <label for="proxyWisp">Wisp
-                <span class="proxy-badge sw">WebSocket</span>
-              </label>
+            <div class="proxy-card" onclick="window.location.href='/wisp/'">
+                <h2>Wisp</h2>
+                <p>WebSocket-based proxy</p>
+                <span class="badge beta">Beta</span>
             </div>
-            <div class="proxy-option">
-              <input type="radio" name="proxyType" id="proxyCustom" value="custom">
-              <label for="proxyCustom">Custom Server
-                <span class="proxy-badge experimental">Advanced</span>
-              </label>
+            <div class="proxy-card" onclick="window.location.href='/aurora/'">
+                <h2>Aurora</h2>
+                <p>Custom proxy server</p>
+                <span class="badge experimental">Experimental</span>
             </div>
-          </div>
-          
-          <div id="wispSettings" class="proxy-settings" style="display: none;">
-            <h4>Wisp Server Settings</h4>
-            <input type="text" id="wispServer" placeholder="Wisp server URL (wss://...)" class="full-width">
-          </div>
-          
-          <div id="customSettings" class="proxy-settings" style="display: none;">
-            <h4>Custom Server Settings</h4>
-            <input type="text" id="customServer" placeholder="Server URL (with %url% placeholder)" class="full-width">
-          </div>
+            <div class="proxy-card" onclick="window.location.href='/cors/'">
+                <h2>CORS Proxy</h2>
+                <p>Simple CORS bypass proxy</p>
+                <span class="badge beta">Beta</span>
+            </div>
         </div>
-        
-        <div class="proxy-server-section">
-          <h4>Proxy Server</h4>
-          <div id="proxyServerList" class="proxy-options-container">
-            <!-- Proxy servers will be dynamically populated here -->
-          </div>
-        </div>
-
-        <div class="proxy-advanced-settings">
-          <h4>Advanced Options</h4>
-          <label>
-            <input type="checkbox" id="bypassCORS">
-            Attempt to bypass CORS restrictions
-          </label>
-          <label>
-            <input type="checkbox" id="useCache">
-            Enable response caching
-          </label>
-          <label>
-            <input type="checkbox" id="rewriteLinks">
-            Rewrite page links
-          </label>
-          <label>
-            <input type="number" id="timeout" min="1000" max="30000" step="1000" value="10000">
-            Request timeout (ms)
-          </label>
-        </div>
-        <div class="custom-proxy-section">
-          <h4>Custom Proxy Servers</h4>
-          <div id="customProxies"></div>
-          <div class="add-proxy-form">
-            <input type="text" id="proxyUrl" placeholder="Proxy URL (with %url% placeholder)">
-            <input type="text" id="proxyName" placeholder="Proxy Name">
-            <select id="proxyType">
-              <option value="standard">Standard CORS Proxy</option>
-              <option value="aurora">Aurora Server</option>
-            </select>
-            <button onclick="addCustomProxy()">Add Proxy</button>
-          </div>
-        </div>
-        <label for="loadModeSelect">Load Mode:</label>
-        <select id="loadModeSelect">
-          <option value="data" selected>Data Only</option>
-          <option value="div">Div Mode</option>
-        </select>
-        <label>
-          <input type="checkbox" id="rewriteResourcesCheck" checked>
-          Rewrite Resource URLs
-        </label>
-        <label>
-          <input type="checkbox" id="overrideDynamicCheck" checked>
-          Override Dynamic Content
-        </label>
-      </div>
-
-      <div class="settings-section">
-        <h3>Custom Code</h3>
-        <textarea id="customCSS" placeholder="Custom CSS..."></textarea>
-        <textarea id="customJS" placeholder="Custom JavaScript..."></textarea>
-      </div>
-
-      <div class="settings-buttons">
-        <button class="save-settings" onclick="saveSettingsAndClose()">Save Settings</button>
-        <button class="cancel-settings" onclick="closeSettings()">Cancel</button>
-      </div>
     </div>
-  </div>
-
-  <!-- Settings Modal -->
-  <div id="settingsModal" class="modal glass-effect">
-    <div id="settingsModalContent">
-      <!-- ... settings content ... -->
-    </div>
-  </div>
-
-  <!-- Extensions Panel -->
-  <div id="extensionsPanel" class="panel glass-effect">
-    <h3>Extensions</h3>
-    <div class="custom-extension-input">
-      <input type="text" id="customExtensionUrl" placeholder="Enter raw GitHub URL to extension.js">
-      <button onclick="installCustomExtension()">Add Extension</button>
-    </div>
-    <div id="installedExtensions"></div>
-    <div class="extension-store">
-      <h4>Available Extensions</h4>
-      <div id="availableExtensions"></div>
-    </div>
-    <button onclick="toggleExtensions()">Close</button>
-  </div>
-
-  <!-- Extension Details Modal -->
-  <div id="extensionModal" class="modal glass-effect">
-    <div class="modal-content">
-      <span class="close" onclick="closeExtensionModal()">&times;</span>
-      <div id="extensionDetails"></div>
-    </div>
-  </div>
-
-  <!-- Load UV and core scripts in proper order -->
-  <script src="/uv/uv.bundle.js"></script>
-  <script src="/uv/uv.config.js"></script>
-  <script src="/uv/uv.handler.js"></script>
-  <script src="/wisp/wisp.js"></script>
-  <script src="main.js"></script>
-  <script src="/sw-register.js" defer></script>
-  
-  <!-- Preload important resources -->
-  <link rel="preload" href="/uv/uv.handler.js" as="script">
-  <link rel="preload" href="/uv/uv.bundle.js" as="script">
-  <link rel="preload" href="/uv/uv.config.js" as="script">
-  <link rel="preload" href="/sw-register.js" as="script">
 </body>
 </html>

@@ -1,4 +1,16 @@
 if (!self.__uv) {
+    if (typeof client === 'undefined') {
+        if (typeof self !== 'undefined' && self.client) {
+            self.client = self.client;
+        } else if (typeof window !== 'undefined' && window.client) {
+            window.client = window.client;
+        } else {
+            // fallback: require uv.core.js
+        }
+    }
+    if (typeof __uvHookClient === 'function') {
+        self.client = __uvHookClient();
+    }
     __uvHook(self, self.__uv$config, self.__uv$config.bare);
 };
 
@@ -755,7 +767,7 @@ async function __uvHook(window, config = {}, bare = '/bare/') {
     });
 
     client.websocket.on('url', event => {
-        if ('__uv$url' in event.that) {
+        if (event.that && '__uv$url' in event.that) {
             event.data.value = event.that.__uv$url;
         };
     });
@@ -1129,46 +1141,43 @@ async function __uvHook(window, config = {}, bare = '/bare/') {
 };
 
 // UV Handler
-(() => {
-    function createFullUrl(url, base = '') {
-        try {
-            if (!url) return null;
-            if (url.startsWith('data:') || url.startsWith('blob:')) return url;
-            if (url.startsWith('about:')) return url;
-            if (url.startsWith('javascript:')) return 'about:blank';
+const ctx = typeof self !== 'undefined' ? self : window;
 
-            // Handle relative URLs
-            if (url.startsWith('/')) {
-                const baseUrl = new URL(base || window.location.href);
-                return new URL(url, baseUrl.origin).href;
+if (!ctx.__uv) {
+    ctx.__uv = {
+        handler: {
+            events: {},
+            on(event, callback) {
+                if (!this.events[event]) this.events[event] = [];
+                this.events[event].push(callback);
+            },
+            once(event, callback) {
+                const wrapper = (...args) => {
+                    callback(...args);
+                    this.off(event, wrapper);
+                };
+                this.on(event, wrapper);
+            },
+            off(event, callback) {
+                if (!this.events[event]) return;
+                this.events[event] = this.events[event].filter(cb => cb !== callback);
+            },
+            emit(event, ...args) {
+                if (!this.events[event]) return;
+                this.events[event].forEach(callback => callback(...args));
             }
-
-            // Add protocol if missing
-            if (!/^https?:\/\//i.test(url)) {
-                url = 'https://' + url.replace(/^\/+/, '');
-            }
-
-            return new URL(url).href;
-        } catch (err) {
-            console.warn('Invalid URL:', url, err);
-            return null;
         }
-    }
-
-    // Override UV's URL handling
-    __uv.meta.url = createFullUrl;
-    
-    // Handle resource URLs
-    __uv.rewriteUrl = (url) => {
-        const full = createFullUrl(url, __uv.meta.url);
-        if (!full) return url;
-        return __uv.prefix + __uv.encodeUrl(full);
     };
+}
 
-    __uv.handler.on('request', event => {
-        if (event.data.url) {
-            const fullUrl = createFullUrl(event.data.url, event.data.baseUrl);
-            if (fullUrl) event.data.url = fullUrl;
-        }
-    });
-})();
+// Initialize UV if not already done
+if (!ctx.client) {
+    ctx.client = {
+        // ...existing client definition...
+    };
+}
+
+// Hook UV with event system
+function __uvHook(window, config = {}, bare = '/bare/') {
+    // ...existing uvHook code...
+}

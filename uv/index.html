@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Aurora UV Browser</title>
+    <link rel="stylesheet" href="../browser/browser.css">
+    <link rel="icon" href="../favicon.ico">
+    <!-- Load all UV components first -->
+    <script src="uv.bundle.js"></script>
+    <script src="uv.client.js"></script>
+    <script src="uv.config.js"></script>
+    <script src="uv.handler.js"></script>
+</head>
+<body>
+    <header id="header" class="browser-header glass-effect">
+        <div class="toolbar-left">
+            <button class="nav-btn" onclick="handleBrowserAction('goBack')" title="Back">&#8592;</button>
+            <button class="nav-btn" onclick="handleBrowserAction('goForward')" title="Forward">&#8594;</button>
+            <button class="nav-btn" onclick="handleBrowserAction('refreshPage')" title="Refresh">&#8635;</button>
+            <input id="urlBar" type="text" placeholder="Enter URL or search">
+            <button class="load-btn" onclick="handleBrowserAction('loadActiveTab')" title="Load">Go</button>
+        </div>
+        <div class="toolbar-right">
+            <button id="extensionsBtn" class="nav-btn" title="Extensions">🧩</button>
+            <button id="settingsBtn" class="nav-btn" onclick="handleBrowserAction('openSettings')" title="Settings">⚙️</button>
+            <a href="/" class="nav-btn" title="Change Proxy">⚡</a>
+        </div>
+    </header>
+
+    <div id="tabBar" class="tab-bar glass-effect">
+        <button id="addTabBtn" class="add-tab-btn" onclick="handleBrowserAction('newTab')" title="New Tab">+</button>
+    </div>
+
+    <div id="content"></div>
+    <div id="extensionsPanel" class="extensions-panel glass-effect" style="display: none;">
+        <div class="settings-header">
+            <h2>Settings</h2>
+            <button class="close-btn" onclick="handleBrowserAction('closeSettings')">&times;</button>
+        </div>
+        <div class="settings-content">
+            <div class="setting-group">
+                <h3>Proxy Settings</h3>
+                <p>Current proxy: UV</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load browser core -->
+    <script src="../browser/browser.js"></script>
+    <script src="../browser/aurora-start.js"></script>
+    <script>window.AuroraBrowser = AuroraBrowser;</script>
+    
+    <script>
+        // Global browser instance
+        let browser;
+        let registeredServiceWorker = false;
+        
+        // Initialize UV and browser
+        async function initBrowser() {
+            try {
+                // Register service worker
+                if ('serviceWorker' in navigator) {
+                    await navigator.serviceWorker.register('./sw.js', {
+                        scope: __uv$config.prefix,
+                        updateViaCache: 'none'
+                    });
+                    console.log('UV service worker registered');
+                }
+
+                // Initialize browser with UV proxy
+                const browser = new AuroraBrowser({
+                    // Browser methods
+                    goBack: () => window.history.back(),
+                    goForward: () => window.history.forward(),
+                    refreshPage: () => window.location.reload(),
+                    closeTab: (tabId) => browser.removeTab(tabId),
+                    closeSettings: () => {
+                        const settingsPanel = document.getElementById('extensionsPanel');
+                        if (settingsPanel) settingsPanel.style.display = 'none';
+                    },
+                    openSettings: () => {
+                        const settingsPanel = document.getElementById('extensionsPanel');
+                        if (settingsPanel) settingsPanel.style.display = 'block';
+                    },
+                    proxyHandler: async (tabId, url) => {
+                        try {
+                            const container = document.getElementById(tabId);
+                            if (!container) {
+                                throw new Error(`Container ${tabId} not found`);
+                            }
+
+                            const iframe = document.createElement('iframe');
+                            iframe.style.width = '100%';
+                            iframe.style.height = '100%';
+                            iframe.style.border = 'none';
+                            iframe.allow = 'fullscreen; autoplay; clipboard-write';
+                            iframe.sandbox = 'allow-same-origin allow-scripts allow-forms allow-popups';
+                            
+                            if (url.startsWith('aurora://')) {
+                                await window.browser.loadInternalPage(tabId, url.slice(9));
+                                return;
+                            }
+
+                            // Process URL through UV
+                            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                                url = 'https://' + url.replace(/^\/+/, '');
+                            }
+                            
+                            if (window.__uv && window.__uv$config) {
+                                const processedUrl = window.__uv$config.prefix + window.__uv$config.encodeUrl(url);
+                                iframe.src = processedUrl;
+                            } else {
+                                throw new Error('UV not initialized');
+                            }
+                            
+                            container.innerHTML = '';
+                            container.appendChild(iframe);
+                        } catch (err) {
+                            console.error('Proxy error:', err);
+                            throw err;
+                        }
+                    },
+                    defaultUrl: 'aurora://start',
+                    onTabClosed: (tabId) => {
+                        console.log('Tab closed:', tabId);
+                    },
+                    onError: (error) => {
+                        console.error('Browser error:', error);
+                    }
+                });
+
+                // Set global browser reference and open initial tab
+                window.browser = browser;
+                browser.newTab();
+
+            } catch (err) {
+                console.error('Browser initialization failed:', err);
+            }
+        }
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initBrowser);
+        } else {
+            initBrowser();
+        }
+
+        // Handle button clicks when browser isn't ready
+        function handleBrowserAction(action) {
+            if (!window.browser) {
+                console.error('Browser not initialized');
+                return;
+            }
+            if (typeof window.browser[action] === 'function') {
+                window.browser[action]();
+            }
+        }
+    </script>
+</body>
+</html>

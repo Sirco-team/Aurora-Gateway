@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Aurora Wisp Browser</title>
+    <link rel="stylesheet" href="../browser/browser.css">
+    <link rel="icon" href="../favicon.ico">
+</head>
+<body>
+    <header id="header" class="browser-header glass-effect">
+        <div class="toolbar-left">
+            <button class="nav-btn" onclick="browser.goBack()" title="Back">&#8592;</button>
+            <button class="nav-btn" onclick="browser.goForward()" title="Forward">&#8594;</button>
+            <button class="nav-btn" onclick="browser.refreshPage()" title="Refresh">&#8635;</button>
+            <input id="urlBar" type="text" placeholder="Enter URL or search">
+            <button class="load-btn" onclick="browser.loadActiveTab()" title="Load">Go</button>
+        </div>
+        <div class="toolbar-right">
+            <a href="/" class="nav-btn" title="Change Proxy">⚡</a>
+        </div>
+    </header>
+
+    <div id="tabBar" class="tab-bar glass-effect">
+        <button id="addTabBtn" class="add-tab-btn" onclick="browser.newTab()" title="New Tab">+</button>
+    </div>
+
+    <div id="content"></div>
+
+    <script src="../browser/browser.js"></script>
+    <script src="wisp.js"></script>
+    <script>
+        // Initialize Wisp browser
+        const browser = new AuroraBrowser({
+            proxyHandler: async (tabId, url) => {
+                try {
+                    const container = document.getElementById(tabId);
+                    const wispUrl = 'wss://' + location.host + '/ws/' + encodeURIComponent(url);
+                    const iframe = document.createElement('iframe');
+                    iframe.style.width = '100%';
+                    iframe.style.height = '100%';
+                    iframe.style.border = 'none';
+                    iframe.src = 'about:blank';
+                    container.innerHTML = '';
+                    container.appendChild(iframe);
+
+                    const ws = new WebSocket(wispUrl);
+                    ws.onmessage = (event) => {
+                        iframe.srcdoc = event.data;
+                    };
+                } catch (err) {
+                    console.error('Wisp proxy error:', err);
+                    throw err;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

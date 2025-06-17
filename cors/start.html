@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Aurora CORS Start</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            font-family: system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1e1e2e, #2d2d44);
+            color: #fff;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .start-page {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .start-logo {
+            font-size: 42px;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+        .search-box {
+            width: 100%;
+            padding: 15px 25px;
+            font-size: 16px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            outline: none;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        .search-box:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            background: rgba(255,255,255,0.15);
+        }
+        .search-box::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .quick-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+        .quick-link:hover {
+            transform: translateY(-2px);
+            background: rgba(255,255,255,0.15);
+            border-color: #6366f1;
+        }
+        .quick-link img {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+        }
+        .proxy-info {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        .proxy-info h2 {
+            margin-top: 0;
+            color: #6366f1;
+        }
+    </style>
+</head>
+<body>
+    <div class="start-page">
+        <h1 class="start-logo">Aurora Gateway</h1>
+        <div class="search-container">
+            <form id="search-form" onsubmit="handleSearch(event)">
+                <input type="text" class="search-box" placeholder="Search or enter URL" autofocus>
+            </form>
+        </div>
+        <div class="quick-links">
+            <a href="javascript:void(0)" class="quick-link" data-url="https://google.com">
+                <img src="https://www.google.com/favicon.ico" alt="Google">
+                Google
+            </a>
+            <a href="javascript:void(0)" class="quick-link" data-url="https://youtube.com">
+                <img src="https://www.youtube.com/favicon.ico" alt="YouTube">
+                YouTube
+            </a>
+            <a href="javascript:void(0)" class="quick-link" data-url="https://discord.com">
+                <img src="https://discord.com/favicon.ico" alt="Discord">
+                Discord
+            </a>
+            <a href="javascript:void(0)" class="quick-link" data-url="https://reddit.com">
+                <img src="https://www.reddit.com/favicon.ico" alt="Reddit">
+                Reddit
+            </a>
+        </div>
+        <div class="proxy-info">
+            <h2>CORS Proxy</h2>
+            <p>Using: <span id="currentProxy">Loading...</span></p>
+        </div>
+    </div>
+
+    <script>
+        function handleSearch(e) {
+            e.preventDefault();
+            const query = e.target.querySelector('input').value;
+            let url = query;
+            
+            if (!url.match(/^https?:\/\//i)) {
+                if (url.includes('.') && !url.includes(' ')) {
+                    url = 'https://' + url;
+                } else {
+                    url = 'https://www.google.com/search?q=' + encodeURIComponent(url);
+                }
+            }
+
+            loadSite(url);
+        }
+
+        function loadSite(url) {
+            if (window.parent && window.parent.browser) {
+                window.parent.browser.loadTab(window.parent.browser.activeTabId, url);
+                // Update URL bar
+                const urlBar = window.parent.document.getElementById('urlBar');
+                if (urlBar) {
+                    urlBar.value = url;
+                }
+            }
+            return false;
+        }
+
+        // Show current proxy
+        document.getElementById('currentProxy').textContent = 
+            window.parent.currentProxy || 'corsproxy.io';
+    </script>
+</body>
+</html>
