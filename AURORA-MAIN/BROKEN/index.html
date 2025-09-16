@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Aurora Gateway</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1e1e2e, #2d2d44);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            text-align: center;
+            color: #fff;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 1em;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .proxy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 800px;
+            padding: 20px;
+        }
+        .proxy-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .proxy-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-top: 8px;
+        }
+        .recommended { background: #4CAF50; }
+        .beta { background: #2196F3; }
+        .experimental { background: #FF9800; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Aurora Gateway</h1>
+        <div class="proxy-grid">
+            <div class="proxy-card" onclick="window.location.href='/uv/'">
+                <h2>Ultraviolet</h2>
+                <p>Fast and reliable proxy</p>
+                <span class="badge recommended">Recommended</span>
+            </div>
+            <div class="proxy-card" onclick="window.location.href='/wisp/'">
+                <h2>Wisp</h2>
+                <p>WebSocket-based proxy</p>
+                <span class="badge beta">Beta</span>
+            </div>
+            <div class="proxy-card" onclick="window.location.href='/aurora/'">
+                <h2>Aurora</h2>
+                <p>Custom proxy server</p>
+                <span class="badge experimental">Experimental</span>
+            </div>
+            <div class="proxy-card" onclick="window.location.href='/cors/'">
+                <h2>CORS Proxy</h2>
+                <p>Simple CORS bypass proxy</p>
+                <span class="badge beta">Beta</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
